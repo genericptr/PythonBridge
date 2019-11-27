@@ -1,7 +1,10 @@
 {$mode objfpc}
-{$modeswitch objectivec2}
 
 {$ifdef darwin}
+{$linklib libpython3.7m.a}
+{$endif}
+
+{$ifdef linux}
 {$linklib libpython3.7m.a}
 {$endif}
 
@@ -41,6 +44,7 @@ var
                           'print(gl.version())'+LF+
                           'print(sys.path)'+LF+
                           #0;
+
 var
   home: ansistring;
   form: TForm;

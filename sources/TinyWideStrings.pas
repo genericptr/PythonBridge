@@ -1,4 +1,4 @@
-{$I Definition.Inc}
+{$mode objfpc}
 
 unit TinyWideStrings;
 //  Tiny WideStringList implementation for versions of Delphi prior to BDS2006
