@@ -8,7 +8,7 @@ uses
 
 type
   TPythonBridgeMethod = record
-    name: string;
+    name: ansistring;
     callback: PyCFunction;
     help: ansistring;
   end;
@@ -28,7 +28,7 @@ type
       procedure AllocMethods;
       procedure ReallocMethods;
     public
-      constructor Create(ModuleName: ansistring);
+      constructor Create(name: ansistring);
       destructor Destroy; override;
       procedure Finalize;
       function AddMethod(AMethodName: PAnsiChar;
@@ -43,7 +43,7 @@ type
   PythonDataMethodCallback = procedure (data: ansistring) of object; 
 
 procedure PythonInitialize(pythonHome: ansistring; callback: PythonDataMethodCallback);
-function PythonAddModule(ModuleName: string; methods: PPythonBridgeMethodArray; count: integer): TPythonModule;
+function PythonAddModule(name: ansistring; methods: PPythonBridgeMethodArray; count: integer): TPythonModule;
 
 function PyString_FromString( str: ansistring): PPyObject;
 
@@ -62,7 +62,7 @@ type
 var
   DataMethodCallback: PythonDataMethodCallback = nil;
 
-function PyUnicode_FromWideString( const AString : UnicodeString) : PPyObject;
+function PyUnicode_FromWideString(const AString : UnicodeString) : PPyObject;
 {$IFDEF unix}
 var
   _ucs4Str : UCS4String;
@@ -261,9 +261,9 @@ begin
     CheckError;
 end;
 
-constructor TPythonModule.Create(ModuleName: ansistring);
+constructor TPythonModule.Create(name: ansistring);
 begin
-  FModuleName := ModuleName;
+  FModuleName := name;
   FillChar(FModuleDef, SizeOf(FModuleDef), 0);
   AllocMethods;
 end;
@@ -278,13 +278,13 @@ end;
 var
   pyio_module: TPythonModule = nil;
 
-function PythonAddModule(ModuleName: string; methods: PPythonBridgeMethodArray; count: integer): TPythonModule;
+function PythonAddModule(name: ansistring; methods: PPythonBridgeMethodArray; count: integer): TPythonModule;
 var
   i: integer;
 begin
-  result := TPythonModule.Create(ModuleName);
+  result := TPythonModule.Create(name);
   for i := 0 to count - 1 do
-    result.AddMethod(PAnsiChar(@methods^[i].name[1]), methods^[i].callback, PAnsiChar(methods^[i].help));
+    result.AddMethod(PAnsiChar(methods^[i].name), methods^[i].callback, PAnsiChar(methods^[i].help));
   result.Finalize;
 end;
 
