@@ -5,6 +5,7 @@
 {$endif}
 
 {$ifdef linux}
+{$linklib c}
 {$linklib libpython3.7m.a}
 {$endif}
 

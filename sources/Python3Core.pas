@@ -1287,8 +1287,8 @@ var
   function PyObject_Str ( v: PPyObject): PPyObject; cdecl; external;
   function PyRun_String ( str: PAnsiChar; start: Integer; globals: PPyObject; locals: PPyObject): PPyObject; cdecl; external;
   function PyRun_SimpleString ( str: PAnsiChar): Integer; cdecl; external;
-  function PyBytes_AsString ( ob: PPyObject): PAnsiChar; cdecl; external name 'PyBytes_AsString';
-  function PyBytes_AsStringAndSize ( ob: PPyObject; var buffer: PAnsiChar; var size: NativeInt): integer; cdecl; external 'PyBytes_AsStringAndSize';
+  function PyBytes_AsString ( ob: PPyObject): PAnsiChar; cdecl; external;
+  function PyBytes_AsStringAndSize ( ob: PPyObject; var buffer: PAnsiChar; var size: NativeInt): integer; cdecl; external;
   procedure PySys_SetArgv ( argc: Integer; argv: PPWideChar); cdecl; external;
   function PyCFunction_New (md:PPyMethodDef;ob:PPyObject):PPyObject; cdecl; external;
   function PyCFunction_NewEx (md:PPyMethodDef;self, ob:PPyObject):PPyObject; cdecl; external;
