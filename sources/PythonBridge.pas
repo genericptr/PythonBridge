@@ -252,10 +252,9 @@ begin
 
   // https://docs.python.org/3.1/c-api/module.html
   FModule:= PyModule_Create2(@ModuleDef, 1013);
-  //Result:= PyModule_Create(@md);
-
   if not Assigned(FModule) then
     CheckError;
+
   modules := PyImport_GetModuleDict();
   if PyDict_SetItemString(modules, ModuleDef.m_name, FModule) <> 0 then
     CheckError;

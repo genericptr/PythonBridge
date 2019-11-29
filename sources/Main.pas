@@ -55,11 +55,11 @@ var
 begin
   form := TForm.Create;
 
-  {$ifdef PYTHON_DYNAMIC}
-  LoadLibrary(ExtractFileDir(ParamStr(0))+'/libpython3.7.dylib');
-  {$endif}
-
   home := ExtractFileDir(ParamStr(0))+'/python37';
+
+  {$ifdef PYTHON_DYNAMIC}
+  LoadLibrary(home+'/bin/libpython3.7.dylib');
+  {$endif}
 
   PythonInitialize(home, @form.GotPythonData);
   PythonAddModule('gl', @methods, length(methods));
