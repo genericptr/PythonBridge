@@ -15,10 +15,9 @@
 
 // https://www.python.org/downloads/release/python-374/
 
-// build:
+// build (darwin and linux):
 // ./configure --disable-shared
 // make
-// make tests (optional)
 
 program Main;
 uses
@@ -55,6 +54,10 @@ var
   form: TForm;
 begin
   form := TForm.Create;
+
+  {$ifdef PYTHON_DYNAMIC}
+  LoadLibrary(ExtractFileDir(ParamStr(0))+'/libpython3.7.dylib');
+  {$endif}
 
   home := ExtractFileDir(ParamStr(0))+'/python37';
 

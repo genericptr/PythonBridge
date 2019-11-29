@@ -142,7 +142,7 @@ procedure CheckError(ACatchStopEx : Boolean = False);
 begin
   if PyErr_Occurred <> nil then
     begin
-      if ACatchStopEx and (PyErr_GivenExceptionMatches(PyErr_Occurred, PyExc_StopIteration^) <> 0) then
+      if ACatchStopEx and (PyErr_GivenExceptionMatches(PyErr_Occurred(), PyExc_StopIteration^) <> 0) then
         begin
           PyErr_Clear;
           raise EPythonError.Create('Stop iteration');
@@ -256,7 +256,7 @@ begin
 
   if not Assigned(FModule) then
     CheckError;
-  modules := PyImport_GetModuleDict;
+  modules := PyImport_GetModuleDict();
   if PyDict_SetItemString(modules, ModuleDef.m_name, FModule) <> 0 then
     CheckError;
 end;
@@ -307,7 +307,6 @@ begin
   pyio_module := TPythonModule.Create('pyio');
   pyio_module.AddMethod('write', @pyio_write, 'write(String) -> None');
   pyio_module.Finalize;
-  //ExecString(code, file_input);
   PyRun_SimpleString(PAnsiChar(code));
 end;
 
