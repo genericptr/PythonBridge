@@ -1161,6 +1161,7 @@ var
   end;
 begin
   handle := Dynlibs.LoadLibrary(path);
+  Assert(handle <> NilHandle, 'python library '+path+' failed to load.');
   {$ifdef PYTHON_DYNAMIC}
   {$include DynamicImports}
   {$endif}
