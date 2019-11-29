@@ -29,9 +29,9 @@ uses
 {$IFDEF windows}
   Windows,
 {$ELSE}
-  CTypes,
   Types,
 {$ENDIF}
+  CTypes,
   Classes,
   SysUtils,
   SyncObjs,
