@@ -40,7 +40,7 @@ type
   end;
 
 type
-  PythonDataMethodCallback = procedure (data: ansistring) of object; 
+  PythonDataMethodCallback = procedure (data: UnicodeString) of object; 
 
 function PythonInitialize(pythonHome: ansistring; callback: PythonDataMethodCallback): boolean;
 function PythonAddModule(name: ansistring; methods: PPythonBridgeMethodArray; count: integer): TPythonModule;
@@ -97,8 +97,7 @@ begin
       if PyUnicode_AsWideChar(obj, @_ucs4Str[0], _size) <> _size then
         raise EPythonError.Create('Could not copy the whole Unicode string into its buffer');
       Result := UCS4StringToWideString(_ucs4Str);
-      // remove trailing zeros (needed by Kylix1)
-      while (Length(Result) > 0) and (Result[Length(Result)] = #0) do
+      while (Length(Result) > 0) and (Result[Length(Result)] in [#0, LF]) do
         Delete(Result, Length(Result), 1);
 {$ELSE}
       SetLength(Result, _size);
@@ -142,14 +141,19 @@ end;
 
 function pyio_write(self, args : PPyObject) : PPyObject; cdecl;
 var
-  a1 : PPyObject;
+  a1: PPyObject;
+  s: UnicodeString;
 begin
 
   if Assigned(args) and (PyTuple_Size(args) > 0) then
     begin
       a1 := PyTuple_GetItem(args, 0);
       if Assigned(a1) then
-        DataMethodCallback(PyUnicode_AsWideString(a1));
+        begin
+          s := PyUnicode_AsWideString(a1);
+          if Length(s) > 0 then
+            DataMethodCallback(s);
+        end;
       Result := ReturnNone;
     end
   else

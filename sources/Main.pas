@@ -30,12 +30,12 @@ end;
 
 type
   TForm = class
-    procedure GotPythonData(data: ansistring); 
+    procedure GotPythonData(data: UnicodeString); 
   end;
 
-procedure TForm.GotPythonData(data: ansistring); 
+procedure TForm.GotPythonData(data: UnicodeString); 
 begin
-  write(data);
+  writeln(data);
 end;
 
 var
