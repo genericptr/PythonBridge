@@ -5,10 +5,11 @@ CodePointer(Py_OptimizeFlag)            := Import('Py_OptimizeFlag');
 CodePointer(Py_NoSiteFlag)              := Import('Py_NoSiteFlag');
 CodePointer(Py_FrozenFlag)              := Import('Py_FrozenFlag');
 CodePointer(Py_IgnoreEnvironmentFlag)   := Import('Py_IgnoreEnvironmentFlag');
+// https://docs.python.org/3.3/c-api/bool.html
 CodePointer(Py_None)                    := Import('_Py_NoneStruct');
-CodePointer(Py_Ellipsis)                := Import('_Py_EllipsisObject');
 CodePointer(Py_False)                   := Import('_Py_FalseStruct');
 CodePointer(Py_True)                    := Import('_Py_TrueStruct');
+CodePointer(Py_Ellipsis)                := Import('_Py_EllipsisObject');
 CodePointer(Py_NotImplemented)          := Import('_Py_NotImplementedStruct');
 CodePointer(PyImport_FrozenModules)     := Import('PyImport_FrozenModules');
 CodePointer(PyExc_AttributeError)       := Import('PyExc_AttributeError');

@@ -8,9 +8,9 @@ Py_IgnoreEnvironmentFlag:cint; cvar; external;
 PyImport_FrozenModules:PP_frozen; cvar; external;
 Py_Ellipsis:PPyObject; cvar; external;
 // https://docs.python.org/3.3/c-api/bool.html
-Py_None:PPyObject = nil; //external '_Py_NoneStruct';
-Py_False:PPyIntObject = nil; //external '_Py_FalseStruct';
-Py_True:PPyIntObject = nil; //external '_Py_TrueStruct';
+Py_None:PPyObject = nil;
+Py_False:PPyIntObject = nil;
+Py_True:PPyIntObject = nil;
 _Py_TrueStruct:PPyIntObject; cvar; external;
 _Py_NoneStruct:PPyIntObject; cvar; external;
 _Py_FalseStruct:PPyIntObject; cvar; external;
