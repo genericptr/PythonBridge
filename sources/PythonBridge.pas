@@ -97,13 +97,14 @@ begin
       if PyUnicode_AsWideChar(obj, @_ucs4Str[0], _size) <> _size then
         raise EPythonError.Create('Could not copy the whole Unicode string into its buffer');
       Result := UCS4StringToWideString(_ucs4Str);
-      while (Length(Result) > 0) and (Result[Length(Result)] in [#0, LF]) do
-        Delete(Result, Length(Result), 1);
 {$ELSE}
       SetLength(Result, _size);
       if PyUnicode_AsWideChar(obj, @Result[1], _size) <> _size then
         raise EPythonError.Create('Could not copy the whole Unicode string into its buffer');
 {$ENDIF}
+      // Clean line endings
+      while (Length(Result) > 0) and (Result[Length(Result)] in [#0, CR, LF]) do
+        Delete(Result, Length(Result), 1);
     end
     else
       Result := '';

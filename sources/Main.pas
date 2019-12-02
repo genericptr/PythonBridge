@@ -56,21 +56,17 @@ begin
   form := TForm.Create;
   root := ExtractFileDir(ParamStr(0));
 
-  {$ifdef darwin}
+  {$ifdef unix}
     home := root+'/python37';
     {$ifdef PYTHON_DYNAMIC}
     LoadLibrary(home+'/darwin/libpython3.7.dylib');
     {$endif}
   {$endif}
 
-  {$ifdef linux}
-    home := root+'/python37';
-  {$endif}
-
   {$ifdef windows}
-    home := root+'/windows/python37';
+    home := root+'\windows\python37';
     {$ifdef PYTHON_DYNAMIC}
-    LoadLibrary(home+'/windows/python37.dll');
+    LoadLibrary(root+'\windows\python37.dll');
     {$endif}
   {$endif}
 
