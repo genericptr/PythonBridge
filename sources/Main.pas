@@ -39,7 +39,7 @@ begin
 end;
 
 var
-  methods: array[0..0] of TPythonBridgeMethod = ( (name: 'version'; callback: @PyVERSION; help: 'doc')
+  methods: array[0..0] of TPythonBridgeMethod = ( (name: 'version'; callback: @PyVERSION; help: 'doc string for my function')
                                                 );
 
 var
@@ -47,6 +47,16 @@ var
                           'import sys'+LF+
                           'print(gl.version())'+LF+
                           'print(sys.path)'+LF+
+                          #0;
+
+var
+  test_help: ansistring = 'import gl'+LF+
+                          'print(gl.__doc__)'+LF+
+                          'for key in dir( gl ):'+LF+
+                          '  if not key.startswith(''_''):'+LF+
+                          '    x = getattr( gl, key ).__doc__'+LF+
+                          '    print(key+'' (built-in function): '')'+LF+
+                          '    print(x)'+LF+
                           #0;
 
 var
