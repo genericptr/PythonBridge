@@ -42,7 +42,7 @@ type
 type
   PythonDataMethodCallback = procedure (data: ansistring) of object; 
 
-procedure PythonInitialize(pythonHome: ansistring; callback: PythonDataMethodCallback);
+function PythonInitialize(pythonHome: ansistring; callback: PythonDataMethodCallback): boolean;
 function PythonAddModule(name: ansistring; methods: PPythonBridgeMethodArray; count: integer): TPythonModule;
 
 function PyString_FromString( str: ansistring): PPyObject;
@@ -58,6 +58,9 @@ type
       EValue : String;
   end;
   EPyExecError   = class(EPythonError);
+
+const
+  PYTHON_API = 1013;
 
 var
   DataMethodCallback: PythonDataMethodCallback = nil;
@@ -115,21 +118,39 @@ begin
   result := PyUnicode_FromWideString(_text);
 end;
 
+procedure Py_INCREF(op: PPyObject);
+begin
+  Inc(op^.ob_refcnt);
+end;
+
+procedure Py_DECREF(op: PPyObject);
+begin
+  with op^ do begin
+    Dec(ob_refcnt);
+    if ob_refcnt = 0 then begin
+      ob_type^.tp_dealloc(op);
+    end;
+  end;
+end;
+
+// https://docs.python.org/3.7/c-api/none.html#c.Py_RETURN_NONE
+function ReturnNone: PPyObject;
+begin
+  result := Py_None;
+  Py_INCREF(result);
+end;
+
 function pyio_write(self, args : PPyObject) : PPyObject; cdecl;
 var
   a1 : PPyObject;
 begin
-
-  // TODO: still keep this?
-  // Forbid printing for any other thread than the main one
-  //if GetCurrentThreadId <> MainThreadId then
 
   if Assigned(args) and (PyTuple_Size(args) > 0) then
     begin
       a1 := PyTuple_GetItem(args, 0);
       if Assigned(a1) then
         DataMethodCallback(PyUnicode_AsWideString(a1));
-      Result := Py_None;
+      Result := ReturnNone;
     end
   else
     begin
@@ -150,62 +171,9 @@ begin
       else
         begin
           PyErr_Print;
-          //Traceback.Refresh;
-          //RaiseError;
           raise EPythonError.Create('Error');
         end;
     end;
-end;
-
-function ExecString(command : ansistring; mode : Integer; locals : PPyObject = nil; globals : PPyObject = nil) : PPyObject;
-
-  function CleanString(const s : ansistring) : ansistring;
-  var
-    i : Integer;
-  begin
-    result := s;
-    if s = '' then
-      Exit;
-    i := Pos(CR,s);
-    while i > 0 do
-      begin
-        Delete( result, i, 1 );
-        i := Pos(CR,result);
-      end;
-    if result[length(result)] <> LF then
-      Insert( LF, result, length(result)+1 );
-  end;
-
-var
-  m : PPyObject;
-  _locals, _globals : PPyObject;
-begin
-  Result := nil;
-
-  m := PyImport_AddModule(PAnsiChar('__main__'));
-  if m = nil then
-    raise EPythonError.Create('can''t create __main__');
-
-  if Assigned(locals) then
-    _locals  := locals
-  else
-    _locals  := PyModule_GetDict(m);
-
-  if Assigned(globals) then
-    _globals := globals
-  else
-    _globals := PyModule_GetDict(m);
-
-  try
-    Result := PyRun_String(PAnsiChar(CleanString(command)), mode, _globals, _locals);
-    if Result = nil then
-      CheckError(False);
-  except
-    if PyErr_Occurred <> nil then
-      CheckError(False)
-    else
-      raise EPythonError.Create('PyRun_String');
-  end;
 end;
 
 function TPythonModule.AddMethod( AMethodName  : PAnsiChar;
@@ -230,7 +198,7 @@ begin
   Inc(FAllocatedMethodCount, PYT_METHOD_BUFFER_INCREASE);
   ReAllocMem(FMethods, SizeOf(PyMethodDef)*(FAllocatedMethodCount+1));
   MethodPtr :=@(PMethodArray(FMethods)^[MethodCount+1]);
-  FillChar(MethodPtr^,SizeOf(PyMethodDef)*PYT_METHOD_BUFFER_INCREASE,0);
+  FillChar(MethodPtr^, SizeOf(PyMethodDef)*PYT_METHOD_BUFFER_INCREASE,0);
 end;
 
 procedure TPythonModule.AllocMethods;
@@ -250,8 +218,8 @@ begin
   FModuleDef.m_methods := MethodsData;
   FModuleDef.m_size := -1;
 
-  // https://docs.python.org/3.1/c-api/module.html
-  FModule:= PyModule_Create2(@ModuleDef, 1013);
+  // https://docs.python.org/3.7/c-api/module.html
+  FModule:= PyModule_Create2(@ModuleDef, PYTHON_API);
   if not Assigned(FModule) then
     CheckError;
 
@@ -287,37 +255,42 @@ begin
   result.Finalize;
 end;
 
-procedure RedirectIO;
+function RedirectIO: boolean;
 var
   code: ansistring = 'import sys'+LF+
-         'class DebugOutput:'+LF+
-         '  pyio = __import__("pyio")'+LF+
-         '  softspace=0'+LF+
-         '  encoding=None'+LF+
-         '  def write(self,message):'+LF+
-         '     self.pyio.write(message)'+LF+
-         '  def flush(self):' + LF +
-         '     pass' + LF +
-         'sys.old_stdin=sys.stdin'+LF+
-         'sys.old_stdout=sys.stdout'+LF+
-         'sys.old_stderr=sys.stderr'+LF+
-         #0;
+                     'class DebugOutput:'+LF+
+                     '  pyio = __import__("pyio")'+LF+
+                     '  softspace=0'+LF+
+                     '  encoding=None'+LF+
+                     '  def write(self,message):'+LF+
+                     '     self.pyio.write(message)'+LF+
+                     '  def flush(self):' + LF +
+                     '     pass' + LF +
+                     'sys.old_stdout=sys.stdout'+LF+
+                     'sys.old_stderr=sys.stderr'+LF+
+                     'sys.stdout=DebugOutput()'+LF+
+                     'sys.stderr=DebugOutput()'+LF+
+                     #0;
 begin
   pyio_module := TPythonModule.Create('pyio');
   pyio_module.AddMethod('write', @pyio_write, 'write(String) -> None');
   pyio_module.Finalize;
-  PyRun_SimpleString(PAnsiChar(code));
+  result := PyRun_SimpleString(PAnsiChar(code)) = 0;
 end;
 
-procedure PythonInitialize(pythonHome: ansistring; callback: PythonDataMethodCallback);
+function PythonInitialize(pythonHome: ansistring; callback: PythonDataMethodCallback): boolean;
 begin
   DataMethodCallback := callback;
 
   Py_SetPythonHome(Py_DecodeLocale(PAnsiChar(pythonHome), nil));
   Py_Initialize;
-  // TODO: do we need this?
-  //PyEval_InitThreads;
-  RedirectIO;
+  result := RedirectIO;
 end;
 
+begin
+  // note: these are macros which are pointers to structs
+  // https://stackoverflow.com/questions/15287590/why-should-py-increfpy-none-be-required-before-returning-py-none-in-c#15288194
+  Py_None := PPyObject(@_Py_NoneStruct);
+  Py_False := @_Py_FalseStruct;
+  Py_True := @_Py_TrueStruct;
 end.

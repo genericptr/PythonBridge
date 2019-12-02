@@ -35,7 +35,7 @@ type
 
 procedure TForm.GotPythonData(data: ansistring); 
 begin
-  writeln(data);
+  write(data);
 end;
 
 var
@@ -50,7 +50,7 @@ var
                           #0;
 
 var
-  home: ansistring;
+  home, root: ansistring;
   form: TForm;
 begin
   form := TForm.Create;

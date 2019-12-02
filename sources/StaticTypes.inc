@@ -7,7 +7,6 @@ Py_FrozenFlag:cint; cvar; external;
 Py_IgnoreEnvironmentFlag:cint; cvar; external;
 PyImport_FrozenModules:PP_frozen; cvar; external;
 Py_Ellipsis:PPyObject; cvar; external;
-// TODO: these are aliases?
 // https://docs.python.org/3.3/c-api/bool.html
 Py_None:PPyObject = nil; //external '_Py_NoneStruct';
 Py_False:PPyIntObject = nil; //external '_Py_FalseStruct';
