@@ -67,7 +67,7 @@ begin
   root := ExtractFileDir(ParamStr(0));
 
   {$ifdef unix}
-    home := root+'/python37';
+    home := root+'/unix/python37';
     {$ifdef PYTHON_DYNAMIC}
     LoadLibrary(home+'/darwin/libpython3.7.dylib');
     {$endif}
