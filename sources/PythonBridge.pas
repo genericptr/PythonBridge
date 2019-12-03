@@ -293,9 +293,11 @@ begin
 end;
 
 begin
-  // note: these are macros which are pointers to structs
+  {$ifndef PYTHON_DYNAMIC}
+  // note: these are macros which are pointers to structs when static linking               
   // https://stackoverflow.com/questions/15287590/why-should-py-increfpy-none-be-required-before-returning-py-none-in-c#15288194
   Py_None := PPyObject(@_Py_NoneStruct);
   Py_False := @_Py_FalseStruct;
   Py_True := @_Py_TrueStruct;
+  {$endif}
 end.

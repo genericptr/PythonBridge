@@ -1145,13 +1145,16 @@ var
 {$include StaticTypes}
 {$endif}
 
-procedure LoadLibrary(path: ansistring);
+{$ifdef PYTHON_DYNAMIC}
+procedure LoadLibrary(path: ansistring; loadAll: boolean = true);
+{$endif}
 
 implementation
 uses
   Dynlibs;
 
-procedure LoadLibrary(path: ansistring);
+{$ifdef PYTHON_DYNAMIC}
+procedure LoadLibrary(path: ansistring; loadAll: boolean = true);
 var
   handle: TLibHandle;
   function Import(name: string): CodePointer;
@@ -1162,9 +1165,11 @@ var
 begin
   handle := Dynlibs.LoadLibrary(path);
   Assert(handle <> NilHandle, 'python library '+path+' failed to load.');
-  {$ifdef PYTHON_DYNAMIC}
-  {$include DynamicImports}
-  {$endif}
+  if loadAll then
+    begin
+      {$include DynamicImports}
+    end;
 end;
+{$endif}
 
 end.
