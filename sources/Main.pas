@@ -13,6 +13,8 @@
 {$linklib libpython3.7m.a}
 {$endif}
 
+{$assertions on}
+
 // https://www.python.org/downloads/release/python-374/
 
 // build (darwin and linux):
@@ -67,7 +69,7 @@ begin
   root := ExtractFileDir(ParamStr(0));
 
   {$ifdef unix}
-    home := root+'/unix/python37';
+    home := root+'/unix/dpython37';
     {$ifdef PYTHON_DYNAMIC}
     LoadLibrary(home+'/darwin/libpython3.7.dylib');
     {$endif}
@@ -80,6 +82,7 @@ begin
     {$endif}
   {$endif}
 
+  Assert(DirectoryExists(home), 'Python home can''t be found at '+home);
 
   PythonInitialize(home, @form.GotPythonData);
   PythonAddModule('gl', @methods, length(methods));
