@@ -15,9 +15,8 @@
 
 {$assertions on}
 
+// python building instructions (darwin and linux):
 // https://www.python.org/downloads/release/python-374/
-
-// build (darwin and linux):
 // ./configure --disable-shared
 // make
 
@@ -69,7 +68,7 @@ begin
   root := ExtractFileDir(ParamStr(0));
 
   {$ifdef unix}
-    home := root+'/unix/dpython37';
+    home := root+'/unix/python37';
     {$ifdef PYTHON_DYNAMIC}
     LoadLibrary(home+'/darwin/libpython3.7.dylib');
     {$endif}
